@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>wazzu racing file parser 2025</title>
+
+		<!-- CSS -->
+		<style>
+body {
+	margin: 10vh 20vw 10vh;
+	font-family: monospace;
+	border: 1px inset black;
+	padding: 20px;
+}
+input {
+	font-family: monospace;
+}
+textarea {
+	width: 100%;
+	height: 300px;
+	/* https://stackoverflow.com/questions/657795/how-to-remove-word-wrap-from-textarea */
+	white-space: pre;
+	overflow-wrap: normal;
+	overflow-x: scroll;
+}
+		</style>
+	</head>
+	<body>
+		<!-- HELPER HTML -->
+		<h1>datalogger file parser</h1>
+		<p>upload .bin file to generate a .csv file</p>
+		<br>
+		<label><input type="number" min=0 step=1 value=6 id="n_timestamps"> # uint32_t timestamps</label><br>
+		<label><input type="number" min=0 step=1 value=41 id="n_values"> # int data values</label><br>
+		<br>
+		<input type="file" accept=".bin,.dat,.txt" id="fileupload">
+		<button onclick="go()">go</button>
+		<br><br><br>
+		<textarea id="output" readonly placeholder="csv will appear here..."></textarea>
+		<a href="" id="download" style="display: none;">download csv...</a>
+
+		<!-- JAVASCRIPT -->
+<script>
+	// actually do ArrayBuffer --> CSV conversion
+	function toCSV(buffer, n_timestamps, n_values) {
+		var data = [];
+		let bytesPerRow = (4 * n_timestamps) + (4 * n_values);
+		let rows = buffer.byteLength / (bytesPerRow);
+		let dataview = new DataView(buffer);
+
+		// parse into 2D array...
+		for (var row_i=0; row_i < rows; row_i++) {
+			var row = [];
+			try {
+				// read values in row
+				for (var i=0;i<n_timestamps;i++) row.push(dataview.getUint32((row_i*bytesPerRow)+(4*i), true)); // little endian!
+				for (var i=0;i<n_values;i++) row.push(dataview.getInt32((row_i*bytesPerRow)+(4*i), true)); // little endian!
+			} catch (e) {
+				// length mismatch
+				alert("Error: invalid # of timestamps/values or corrupted data...");
+			}
+			// add row to all rows
+			data.push(row);
+		}
+
+
+		// make actual CSV
+		var csv = "";
+		for (var row_i=0;row_i<rows;row_i++) {
+			for (var i=0;i<(n_timestamps+n_values);i++) {
+				csv += data[row_i][i];
+				if (i < (n_timestamps+n_values - 1)) {
+					csv += ",";
+				}
+			}
+			csv += "\n";
+		}
+		return csv;
+
+	}
+
+	// TO GET THE DATA FROM UPLOAD #################################################################
+	// https://stackoverflow.com/questions/32556664/getting-byte-array-through-input-type-file
+	document.querySelector('#fileupload').onchange = go;
+	function go() {
+		var reader = new FileReader();
+		reader.onload = function() {
+			let n_timestamps = parseInt(document.getElementById("n_timestamps").value);
+			let n_values = parseInt(document.getElementById("n_values").value);
+
+			let csv = toCSV(this.result, n_timestamps, n_values);
+
+			let out = document.getElementById("output");
+			out.innerHTML = csv;
+			out.style.height = (out.scrollHeight) + 20 + "px";
+			out.select();
+			download(csv, "data.csv", "text/plain");
+
+		}
+		reader.readAsArrayBuffer(document.getElementById("fileupload").files[0]);
+	}
+
+	// TO DOWNLOAD THE CSV FILE ====================================================================
+	// https://stackoverflow.com/questions/13405129/create-and-save-a-file-with-javascript
+	function download(text, name, type) {
+		var a = document.getElementById("download");
+		a.style.display = "inline";
+		var file = new Blob([text], {type: type});
+		a.href = URL.createObjectURL(file);
+		a.download = name;
+	}
+</script>
+	</body>
+</html>
+<!-- cole wilson for wazzu racing apr 15 2025 -->
