@@ -31,8 +31,8 @@ textarea {
 		<h1>datalogger file parser</h1>
 		<p>upload .bin file to generate a .csv file (<a target="_blank" href="https://github.com/cole-wilson/fsae-parse/blob/main/index.html#L46">view the code</a> for this conversion)</p>
 		<br>
-		<label><input type="number" min=0 step=1 value=6 id="n_timestamps"> # uint32_t timestamps</label><br>
-		<label><input type="number" min=0 step=1 value=41 id="n_values"> # int data values</label><br>
+		<label><input type="number" min=0 step=1 value=6 id="n_ints"> # int vals</label><br>
+		<label><input type="number" min=0 step=1 value=41 id="n_floats"> # float vals</label><br>
 		<br>
 		<input type="file" accept=".bin,.dat,.txt" id="fileupload">
 		<button onclick="go()">go</button>
@@ -43,9 +43,9 @@ textarea {
 		<!-- JAVASCRIPT -->
 <script>
 	// actually do ArrayBuffer --> CSV conversion
-	function toCSV(buffer, n_timestamps, n_values) {
+	function toCSV(buffer, n_ints, n_floats) {
 		var data = [];
-		let bytesPerRow = (4 * n_timestamps) + (4 * n_values);
+		let bytesPerRow = (4 * n_ints) + (4 * n_floats);
 		let rows = buffer.byteLength / (bytesPerRow);
 		let dataview = new DataView(buffer);
 
@@ -54,8 +54,8 @@ textarea {
 			var row = [];
 			try {
 				// read values in row
-				for (var i=0;i<n_timestamps;i++) row.push(dataview.getUint32((row_i*bytesPerRow)+(4*i), true)); // little endian!
-				for (var i=0;i<n_values;i++) row.push(dataview.getInt32((row_i*bytesPerRow)+(4*i), true)); // little endian!
+				for (var i=0;i<n_ints;i++) row.push(dataview.getInt32((row_i*bytesPerRow)+(4*i), true)); // little endian!
+				for (var i=0;i<n_floats;i++) row.push(dataview.getFloat32((row_i*bytesPerRow)+(4*i), true)); // little endian!
 			} catch (e) {
 				// length mismatch
 				alert("Error: invalid # of timestamps/values or corrupted data...");
@@ -68,9 +68,9 @@ textarea {
 		// make actual CSV
 		var csv = "";
 		for (var row_i=0;row_i<rows;row_i++) {
-			for (var i=0;i<(n_timestamps+n_values);i++) {
+			for (var i=0;i<(n_ints+n_floats);i++) {
 				csv += data[row_i][i];
-				if (i < (n_timestamps+n_values - 1)) {
+				if (i < (n_ints+n_floats - 1)) {
 					csv += ",";
 				}
 			}
@@ -86,10 +86,10 @@ textarea {
 	function go() {
 		var reader = new FileReader();
 		reader.onload = function() {
-			let n_timestamps = parseInt(document.getElementById("n_timestamps").value);
-			let n_values = parseInt(document.getElementById("n_values").value);
+			let n_ints = parseInt(document.getElementById("n_ints").value);
+			let n_floats = parseInt(document.getElementById("n_floats").value);
 
-			let csv = toCSV(this.result, n_timestamps, n_values);
+			let csv = toCSV(this.result, n_ints, n_floats);
 
 			let out = document.getElementById("output");
 			out.innerHTML = csv;
