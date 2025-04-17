@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width">
 		<title>wazzu racing file parser 2025</title>
 
+		<link href="//cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" rel="stylesheet">
 		<!-- CSS -->
 		<style>
 body {
@@ -31,19 +32,22 @@ textarea {
 		<h1>datalogger file parser</h1>
 		<p>upload .bin file to generate a .csv file (<a target="_blank" href="https://github.com/cole-wilson/fsae-parse/blob/main/index.html#L46">view the code</a> for this conversion)</p>
 		<br>
-		<label><input type="number" min=0 step=1 value=6 id="n_ints"> # int vals</label><br>
-		<label><input type="number" min=0 step=1 value=41 id="n_floats"> # float vals</label><br>
+		<label><input type="number" min=0 step=1 value=48 id="n_ints"> # int vals</label><br>
+		<label><input type="number" min=0 step=1 value=0 id="n_floats"> # float vals</label><br>
 		<br>
 		<input type="file" accept=".bin,.dat,.txt" id="fileupload">
 		<button onclick="go()">go</button>
 		<br><br><br>
+		<table id="table"></table>
 		<textarea id="output" readonly placeholder="csv will appear here..."></textarea>
 		<a href="" id="download" style="display: none;">download csv...</a>
 
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+		<script src="//cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
 		<!-- JAVASCRIPT -->
 <script>
 	// actually do ArrayBuffer --> CSV conversion
-	function toCSV(buffer, n_ints, n_floats) {
+	function toData(buffer, n_ints, n_floats) {
 		var data = [];
 		let bytesPerRow = (4 * n_ints) + (4 * n_floats);
 		let rows = buffer.byteLength / (bytesPerRow);
@@ -63,11 +67,13 @@ textarea {
 			// add row to all rows
 			data.push(row);
 		}
-
-
+		return data;
+	}
+	function toCSV(buffer, n_ints, n_floats) {
+		let data = toData(buffer, n_ints, n_floats);
 		// make actual CSV
 		var csv = "";
-		for (var row_i=0;row_i<rows;row_i++) {
+		for (var row_i=0;row_i<data.length;row_i++) {
 			for (var i=0;i<(n_ints+n_floats);i++) {
 				csv += data[row_i][i];
 				if (i < (n_ints+n_floats - 1)) {
@@ -90,6 +96,20 @@ textarea {
 			let n_floats = parseInt(document.getElementById("n_floats").value);
 
 			let csv = toCSV(this.result, n_ints, n_floats);
+			let data = toData(this.result, n_ints, n_floats);
+			console.log(data);
+			var html = "";
+			for (var row_i=0;row_i<data.length;row_i++) {
+				html += "<tr>";
+				for (var i=0;i<(n_ints+n_floats);i++) {
+					html += "<td>" + data[row_i][i] + "</td>";
+				}
+				html += "</tr>";
+			}
+			console.log(html)
+			// document.getElementById("table").innerHTML = html;
+			// let table = new DataTable('#table', {});
+
 
 			let out = document.getElementById("output");
 			out.innerHTML = csv;
