@@ -227,14 +227,14 @@ function plot() {
 			{
 				x: objects.map(i=>i.write_millis),
 				y: objects.map(i=>i[field1]),
-				mode: 'lines+markers',
+				mode: 'lines',
 				type: 'scatter',
 				name: field1
 			},
 			{
 				x: objects.map(i=>i.write_millis),
 				y: objects.map(i=>i[field2]),
-				mode: 'lines+markers',
+				mode: 'lines',
 				type: 'scatter',
 				yaxis: 'y2',
 				name: field2
