@@ -126,7 +126,7 @@ function toObjects(rawdata) {
 		o.lon = row[13]/10000000;
 		o.elev = row[14];
 		o.unixtime = new Date(row[15] * 1000);
-		o.ground_speed = row[16];
+		o.ground_speed = row[16] / 447.04;
 		o.afr = row[17]/ 1000;
 		o.fuelload = row[18]/ 1000;
 		o.spark_advance = row[19]/ 1000;
@@ -153,8 +153,8 @@ function toObjects(rawdata) {
 		o.susp_pot_2 = row[40] / 5024;
 		o.susp_pot_3 = row[41] / 5024;
 		o.susp_pot_4 = row[42] / 5024;
-		o.rad_in = row[43] / 5024;
-		o.rad_out = row[44] / 5024;
+		o.rad_in = (((row[43]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
+		o.rad_out = (((row[44]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
 		o.amb_air_temp = row[45];
 		o.brake1 = row[46] / 5024;
 		o.brake2 = row[47] / 5024;
