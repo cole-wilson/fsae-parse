@@ -3,170 +3,44 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>wazzu racing file parser 2025</title>
+		<title>Wazzu Racing Data Viewer</title>
 
-		<!-- <link href="//cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" rel="stylesheet"> -->
 		<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+		<link rel="stylesheet" href="booklet.css">
+
+		<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 		<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
 		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 		<script src='https://cdn.plot.ly/plotly-3.0.1.min.js'></script>
+		<script src="booklet.js"></script>
 
-		<!-- CSS -->
-		<style>
-body {
-	font-family: monospace;
-}
-input {
-	font-family: monospace;
-}
-textarea {
-	width: 100%;
-	height: 300px;
-	/* https://stackoverflow.com/questions/657795/how-to-remove-word-wrap-from-textarea */
-	white-space: pre;
-	overflow-wrap: normal;
-	overflow-x: scroll;
-}
-#map, #plot_container {
-	display: inline-block;
-	width: 49%;
-	height: 400px;
-}
-#plot_container input {
-	max-width: 80px;
-}
-		</style>
+		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<!-- HELPER HTML -->
-		<h1>datalogger file parser</h1>
-		<!-- <p>upload .bin file to generate a .csv file (<a target="_blank" href="https://github.com/cole-wilson/fsae-parse/blob/main/index.html#L46">view the code</a> for this conversion)</p> -->
-		<!-- <br> -->
-		<label style="display:none"><input type="number" min=0 step=1 value=48 id="n_ints"> # int vals</label>
-		<!-- <br> -->
-		<label style="display:none"><input type="number" min=0 step=1 value=0 id="n_floats"> # float vals</label>
-		<!-- <br> -->
-		<!-- <br> -->
-		<input type="file" accept=".bin,.dat,.txt" id="fileupload">
-		<!-- <button onclick="go()">go</button> -->
-		<br>
-		<!-- <br><br> -->
-		<div id="map"></div>
-		<div id="plot_container" style="float: right;">
-			<label>PLOT:  field 1:<select id="field1" onchange="plot()">
-<option value=''>(nothing)</option>
-<option value='write_millis'>write_millis</option>
-<option value='ecu_millis'>ecu_millis</option>
-<option value='gps_millis'>gps_millis</option>
-<option value='imu_millis'>imu_millis</option>
-<option value='accel_millis'>accel_millis</option>
-<option value='analogx1_millis'>analogx1_millis</option>
-<option value='analogx2_millis'>analogx2_millis</option>
-<option value='analogx3_millis'>analogx3_millis</option>
-<option selected value='rpm'>rpm</option>
-<option value='time'>time</option>
-<option value='syncloss_count'>syncloss_count</option>
-<option value='syncloss_code'>syncloss_code</option>
-<option value='lat'>lat</option>
-<option value='lon'>lon</option>
-<option value='elev'>elev</option>
-<option value='unixtime'>unixtime</option>
-<option value='ground_speed'>ground_speed</option>
-<option value='afr'>afr</option>
-<option value='fuelload'>fuelload</option>
-<option value='spark_advance'>spark_advance</option>
-<option value='baro'>baro</option>
-<option value='map'>map</option>
-<option value='mat'>mat</option>
-<option value='clnt_temp'>clnt_temp</option>
-<option value='tps'>tps</option>
-<option value='batt'>batt</option>
-<option value='oil_press'>oil_press</option>
-<option value='ltcl_timing'>ltcl_timing</option>
-<option value='ve1'>ve1</option>
-<option value='ve2'>ve2</option>
-<option value='egt'>egt</option>
-<option value='maf'>maf</option>
-<option value='in_temp'>in_temp</option>
-<option value='ax'>ax</option>
-<option value='ay'>ay</option>
-<option value='az'>az</option>
-<option value='imu_x'>imu_x</option>
-<option value='imu_y'>imu_y</option>
-<option value='imu_z'>imu_z</option>
-<option value='susp_pot_1'>susp_pot_1</option>
-<option value='susp_pot_2'>susp_pot_2</option>
-<option value='susp_pot_3'>susp_pot_3</option>
-<option value='susp_pot_4'>susp_pot_4</option>
-<option value='rad_in'>rad_in</option>
-<option value='rad_out'>rad_out</option>
-<option value='amb_air_temp'>amb_air_temp</option>
-<option value='brake1'>brake1</option>
-<option value='brake2'>brake2</option>
-				</select></label>
-			<label>field 2:<select id="field2" onchange="plot()">
-<option value=''>(nothing)</option>
-<option value='write_millis'>write_millis</option>
-<option value='ecu_millis'>ecu_millis</option>
-<option value='gps_millis'>gps_millis</option>
-<option value='imu_millis'>imu_millis</option>
-<option value='accel_millis'>accel_millis</option>
-<option value='analogx1_millis'>analogx1_millis</option>
-<option value='analogx2_millis'>analogx2_millis</option>
-<option value='analogx3_millis'>analogx3_millis</option>
-<option value='rpm'>rpm</option>
-<option value='time'>time</option>
-<option value='syncloss_count'>syncloss_count</option>
-<option value='syncloss_code'>syncloss_code</option>
-<option value='lat'>lat</option>
-<option value='lon'>lon</option>
-<option value='elev'>elev</option>
-<option value='unixtime'>unixtime</option>
-<option value='ground_speed'>ground_speed</option>
-<option value='afr'>afr</option>
-<option value='fuelload'>fuelload</option>
-<option value='spark_advance'>spark_advance</option>
-<option value='baro'>baro</option>
-<option value='map'>map</option>
-<option value='mat'>mat</option>
-<option value='clnt_temp'>clnt_temp</option>
-<option value='tps'>tps</option>
-<option value='batt'>batt</option>
-<option value='oil_press'>oil_press</option>
-<option value='ltcl_timing'>ltcl_timing</option>
-<option value='ve1'>ve1</option>
-<option value='ve2'>ve2</option>
-<option value='egt'>egt</option>
-<option value='maf'>maf</option>
-<option value='in_temp'>in_temp</option>
-<option value='ax'>ax</option>
-<option value='ay'>ay</option>
-<option value='az'>az</option>
-<option value='imu_x'>imu_x</option>
-<option value='imu_y'>imu_y</option>
-<option value='imu_z'>imu_z</option>
-<option value='susp_pot_1'>susp_pot_1</option>
-<option value='susp_pot_2'>susp_pot_2</option>
-<option value='susp_pot_3'>susp_pot_3</option>
-<option value='susp_pot_4'>susp_pot_4</option>
-<option value='rad_in'>rad_in</option>
-<option value='rad_out'>rad_out</option>
-<option value='amb_air_temp'>amb_air_temp</option>
-<option value='brake1'>brake1</option>
-<option value='brake2'>brake2</option>
-				</select></label>
-			<div id="plot"></div>
+		<div id="app">
+			<section v-if="welcome" id="welcome">
+				<h1>Wazzu Racing Data Viewer</h1>
+				<input type="file" accept=".bin,.dat,.txt" id="fileupload">
+			</section>
+			<section>
+				<header>
+					<span>Wazzu Racing Datalog Viewer</span>
+					<div style="display:inline-block;float:right;text-align:right;margin-right:50px">
+						<span id="logtitle">filename...</span>
+						<a href="#" style="color: white">[csv]</a>
+					</div>
+				</header>
+				<main class="grid-stack">
+					<div id="map"></div>
+					<div id="table"></div>
+					<div id="plot"></div>
+				</main>
+				<footer>
+					<span>footer</span>
+				</footer>
+			</section>
 		</div>
-		<br>
-		<a href="" id="download" style="display: none;">download csv...</a><br>
-		<table id="table"></table>
-		<textarea style="display: none" id="output" readonly placeholder="csv will appear here..."></textarea>
-
-		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-		<script src="//cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
-		<!-- JAVASCRIPT -->
-		<script src="/main.js"></script>
+		<script src="main.js"></script>
 	</body>
 </html>
-<!-- cole wilson for wazzu racing apr 15 2025 -->

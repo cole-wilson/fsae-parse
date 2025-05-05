@@ -1,7 +1,16 @@
+// Vue.component('map', {
+//   data: function () {
+//     return {
+//       count: 0
+//     }
+//   },
+//   template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+// })
+
 var table = new Tabulator("#table", {
     layout:"fitColumns",
     placeholder:"No Data Yet",
-	height:"500px",
+	height:"calc( 100% - 2px)",
 	paginationSize:6,
     paginationSizeSelector:[3, 6, 8, 10],
 	renderHorizontal:"virtual",
@@ -64,6 +73,9 @@ map = L.map('map').setView([34, -110], 3);
 	}).addTo(map);
 
 
+new BookletWindow("#table", {title:"Data Table", x:0, y:0, w:400, h:200, closable:false})
+new BookletWindow("#plot", {title:"Main Plot", x:0, y:200, w:400, h:200, closable:false})
+new BookletWindow("#map", {title:"GPS Data Map", x:0, y:400, w:400, h:200, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
 function toData(buffer, n_ints, n_floats) {
@@ -149,10 +161,10 @@ function toObjects(rawdata) {
 		o.imu_x = row[36]/ 1000;
 		o.imu_y = row[37]/ 1000;
 		o.imu_z = row[38]/ 1000;
-		o.susp_pot_1 = row[39] / 5024;
-		o.susp_pot_2 = row[40] / 5024;
-		o.susp_pot_3 = row[41] / 5024;
-		o.susp_pot_4 = row[42] / 5024;
+		o.susp_pot_1 = ((((row[39]/5024))/(1))*(100))/25.4;
+		o.susp_pot_2 = ((((row[40]/5024))/(1))*(100))/25.4;
+		o.susp_pot_3 = ((((row[41]/5024))/(1))*(100))/25.4;
+		o.susp_pot_4 = ((((row[42]/5024))/(1))*(100))/25.4;
 		o.rad_in = (((row[43]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
 		o.rad_out = (((row[44]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
 		o.amb_air_temp = row[45];
@@ -171,8 +183,8 @@ document.querySelector('#fileupload').onchange = go;
 function go() {
 	var reader = new FileReader();
 	reader.onload = function() {
-		let n_ints = parseInt(document.getElementById("n_ints").value);
-		let n_floats = parseInt(document.getElementById("n_floats").value);
+		let n_ints = 48;
+		let n_floats = 0;
 
 		let csv = toCSV(this.result, n_ints, n_floats);
 		let data = toData(this.result, n_ints, n_floats);
@@ -183,7 +195,7 @@ function go() {
 		window.objects = objects;
 
 
-		for (var i=0;i<objects.length;i+=100) {
+		for (var i=0;i<objects.length;i+=10) {
 			let t = objects[i];
 			var layer = L.circleMarker([t.lat, t.lon], {color: "red",radius: 3,opacity: 0,fillOpacity: 1,weight: 0}).addTo(map);
 			layer.bindPopup(t)
@@ -205,7 +217,14 @@ function go() {
 		// let table = new
 		table.setData(objects);
 		plot();
-		map.setView([objects[20].lat,objects[20].lon], 17);
+		setTimeout(() => {
+		map.setView([objects[20].lat,objects[20].lon], 17)
+		}, 1000)
+		let f = document.getElementById("fileupload").files[0].name;
+		document.getElementById("welcome").remove()
+		let d = get_series("unixtime").filter(i=>i>100)[0].toLocaleDateString();
+		document.getElementById("logtitle").innerText = `${d} (${f})`;
+		document.title = `${d} (${f}) - Wazzu Racing Data Viewer`
 		// let out = document.getElementById("output");
 		// out.innerHTML = csv;
 		// out.style.height = (out.scrollHeight) + 20 + "px";
@@ -214,26 +233,26 @@ function go() {
 
 		var a = document.getElementById("download");
 		a.style.display = "inline";
-		a.onclick = (_) => {table.download("csv", "data.csv")};
+		a.onclick = (_) => {table.download("csv", f.replace(".bin", ".csv"))};
 
 	}
 	reader.readAsArrayBuffer(document.getElementById("fileupload").files[0]);
 }
 
 function plot() {
-	let field1 = document.getElementById("field1").value;
-	let field2 = document.getElementById("field2").value;
-	Plotly.newPlot('plot', [
+	let field1 = "rpm";//document.getElementById("field1").value;
+	let field2 = "time";//document.getElementById("field2").value;
+	a = Plotly.newPlot('plot', [
 			{
-				x: objects.map(i=>i.write_millis),
-				y: objects.map(i=>i[field1]),
+				x: get_series("write_millis"),
+				y: get_series(field1),
 				mode: 'lines',
 				type: 'scatter',
 				name: field1
 			},
 			{
-				x: objects.map(i=>i.write_millis),
-				y: objects.map(i=>i[field2]),
+				x: get_series("write_millis"),
+				y: get_series(field2),
 				mode: 'lines',
 				type: 'scatter',
 				yaxis: 'y2',
@@ -251,9 +270,19 @@ function plot() {
     },
     overlaying: 'y',
     side: 'right'
-  }
-	});
+  },
+		autosize:true,
+		margin: {
+			l:40,r:10,t:10,b:20
+		}
+	}, {responsive:true});
+	a.then(p=>setInterval(p.resize, 500))
 
+
+}
+
+function get_series(series) {
+	return objects.map(i=>i[series])
 }
 
 // TO DOWNLOAD THE CSV FILE ====================================================================
