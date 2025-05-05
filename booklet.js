@@ -1,3 +1,5 @@
+FOCUSED = "";
+
 class BookletWindow {
 	el;
 	tabs = [];
@@ -5,7 +7,7 @@ class BookletWindow {
 	activetab;
 
 	constructor(oid, opts) {
-		this.id = 'booklet-' + btoa((new Date()).getTime());
+		this.id = 'booklet-' + btoa((new Date()).getTime() + Math.random());
 
 		this.el = document.createElement("div");
 			this.el.classList.add("booklet-window");
@@ -15,6 +17,17 @@ class BookletWindow {
 			this.el.style.width = opts.w + "px";
 			this.el.style.height = opts.h + "px";
 			this.el.tabIndex = 0;
+
+		this.el.onmousedown = function() {
+			if (FOCUSED != this.id) {
+				let a = document.getElementById(FOCUSED);
+				if (a) {
+					a.classList.remove("booklet-focused");
+				}
+				FOCUSED = this.id;
+				document.getElementById(FOCUSED).classList.add("booklet-focused");
+			}
+		}
 
 		let topbarEl = document.createElement("div");
 			topbarEl.classList.add("booklet-window-topbar");
@@ -39,6 +52,7 @@ class BookletWindow {
 			closebutton.onclick = () => {this.close()}
 			topbarEl.appendChild(closebutton)
 		}
+		topbarEl.ondblclick = function() {this.minimize()}
 
 		let maximizebutton = document.createElement("button");
 			maximizebutton.innerHTML = "+";
@@ -67,6 +81,8 @@ class BookletWindow {
 
 		this.content.appendChild(document.querySelector(oid))
 
+		this.el.onkeydown = this.maximize
+
 		// booklet.windows[this.id] = this
 		document.body.appendChild(this.el);
 	}
@@ -81,7 +97,7 @@ class BookletWindow {
 	}
 
 	minimize() {
-this.el.classList.toggle("minimized");
+		this.el.classList.toggle("minimized");
 		if (this.el.classList.contains("minimized")) {
 			this.el.classList.remove("maximized")
 			// minimizebutton.innerHTML = "+";

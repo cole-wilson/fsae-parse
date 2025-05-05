@@ -16,7 +16,7 @@
 	font-family: monospace;
 	/* overflow: none; */
 }
-.booklet-window:focus {
+.booklet-window:focus, .booklet-focused {
 	z-index: 999;
 }
 .booklet-window.maximized {

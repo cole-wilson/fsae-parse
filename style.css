@@ -5,19 +5,35 @@ body {
 	background: #A60F2D;
 	color: white;
 }
-
-#welcome {
+input {font-family: monospace}
+#welcome_container {
+	width: 100vw;
+	height: 100vh;
+	content: " ";
 	position: fixed;
 	top: 0;
 	left: 0;
-	width: 100vw;
-	height: 100vh;
-	text-align: center;
-	padding-top: 45vh;
-	background: #A60F2D;
-	z-index: 999999999!important;
+	background: #4D4D4D;
+	z-index: 88888888;
 }
-
+#welcome h1 {
+	font-size: 2em;
+}
+#welcome {
+	position: fixed;
+	top: 35vh;
+	left: 25vw;
+	width: 50vw;
+	padding: 5px 50px 5px;
+	box-sizing: border-box;
+	min-height: 30vh;
+	text-align: center;
+	background: #A60F2D;
+	z-index: 99999999;
+}
+#welcome p {
+	text-align: left;
+}
 header {
 	position: fixed;
 	top: 0;

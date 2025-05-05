@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>Wazzu Racing Data Viewer</title>
+		<title>Wazzu Racing Datalog Viewer</title>
 
 		<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -19,16 +19,20 @@
 	</head>
 	<body>
 		<div id="app">
-			<section v-if="welcome" id="welcome">
-				<h1>Wazzu Racing Data Viewer</h1>
-				<input type="file" accept=".bin,.dat,.txt" id="fileupload">
+			<section id="welcome_container">
+				<div id="welcome">
+					<h1>Wazzu Racing Datalog Viewer</h1>
+					<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+					<br>
+					<input type="file" accept=".bin,.dat,.txt" id="fileupload">
+				</div>
 			</section>
 			<section>
 				<header>
 					<span>Wazzu Racing Datalog Viewer</span>
 					<div style="display:inline-block;float:right;text-align:right;margin-right:50px">
 						<span id="logtitle">filename...</span>
-						<a href="#" style="color: white">[csv]</a>
+						<a href="#" id="download" style="color: white">[csv]</a>
 					</div>
 				</header>
 				<main class="grid-stack">
@@ -141,7 +145,15 @@
 					</div>
 				</main>
 				<footer>
-					<span>footer</span>
+					<span>
+						<!-- <button onclick="control_back()">⏮</button> -->
+						<!-- <button onclick="control_pause()">⏸</button> -->
+						<!-- <button onclick="control_play()">⏵</button> -->
+						<!-- <button onclick="control_forward()">⏭</button> -->
+					</span>
+					<span>
+						<!-- <progress></progress> -->
+					</span>
 				</footer>
 			</section>
 		</div>

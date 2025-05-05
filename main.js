@@ -73,9 +73,9 @@ map = L.map('map').setView([34, -110], 3);
 	}).addTo(map);
 
 
-new BookletWindow("#table", {title:"Data Table", x:0, y:0, w:400, h:200, closable:false})
-new BookletWindow("#plot_c", {title:"Main Plot", x:0, y:200, w:400, h:200, closable:false})
-new BookletWindow("#map", {title:"GPS Data Map", x:0, y:400, w:400, h:200, closable:false})
+new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
+new BookletWindow("#plot_c", {title:"Main Plot", x:300, y:150, w:800, h:500, closable:false})
+new BookletWindow("#table", {title:"Data Table", x:700, y:30, w:600, h:200, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
 function toData(buffer, n_ints, n_floats) {
@@ -221,10 +221,10 @@ function go() {
 		map.setView([objects[20].lat,objects[20].lon], 17)
 		}, 1000)
 		let f = document.getElementById("fileupload").files[0].name;
-		document.getElementById("welcome").remove()
+		document.getElementById("welcome_container").remove()
 		let d = get_series("unixtime").filter(i=>i>100)[0].toLocaleDateString();
 		document.getElementById("logtitle").innerText = `${d} (${f})`;
-		document.title = `${d} (${f}) - Wazzu Racing Data Viewer`
+		document.title = `${d} (${f}) - Wazzu Racing Datalog Viewer`
 		// let out = document.getElementById("output");
 		// out.innerHTML = csv;
 		// out.style.height = (out.scrollHeight) + 20 + "px";
@@ -276,8 +276,9 @@ function plot() {
 			l:40,r:10,t:10,b:20
 		}
 	}, {responsive:true});
-	a.then(p=>setInterval(p.resize, 500))
-
+	document.getElementById("plot").on('plotly_relayout', function(d){
+    console.log('done plotting', d);
+});
 
 }
 
