@@ -60,7 +60,7 @@ footer {
 	margin: 10px;
 	/* height: calc( ( 100vh - 50px - 50px ) / 2.0 )!important; */
 }
-#map, #plot, #table {
+#map, #plot_c, #table {
 	display: inline-block;
 	width: 100%;
 	height: 100%;

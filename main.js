@@ -74,7 +74,7 @@ map = L.map('map').setView([34, -110], 3);
 
 
 new BookletWindow("#table", {title:"Data Table", x:0, y:0, w:400, h:200, closable:false})
-new BookletWindow("#plot", {title:"Main Plot", x:0, y:200, w:400, h:200, closable:false})
+new BookletWindow("#plot_c", {title:"Main Plot", x:0, y:200, w:400, h:200, closable:false})
 new BookletWindow("#map", {title:"GPS Data Map", x:0, y:400, w:400, h:200, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
@@ -240,8 +240,8 @@ function go() {
 }
 
 function plot() {
-	let field1 = "rpm";//document.getElementById("field1").value;
-	let field2 = "time";//document.getElementById("field2").value;
+	let field1 = document.getElementById("field1").value;
+	let field2 = document.getElementById("field2").value;
 	a = Plotly.newPlot('plot', [
 			{
 				x: get_series("write_millis"),
