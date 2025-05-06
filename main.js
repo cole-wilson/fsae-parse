@@ -98,8 +98,8 @@ map = L.map('map_el').setView([34, -110], 3);
 	}).addTo(map);
 
 
-new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
 new BookletWindow("#plot_c", {title:"Main Plot", x:300, y:150, w:800, h:500, closable:false})
+new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
 new BookletWindow("#table", {title:"Data Table", x:700, y:30, w:600, h:200, closable:false})
 new BookletWindow("#info", {title:"Details", x:900, y:500, w:250, h:100, closable:false})
 
