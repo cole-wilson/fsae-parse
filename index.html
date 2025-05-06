@@ -13,6 +13,8 @@
 		<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
 		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 		<script src='https://cdn.plot.ly/plotly-3.0.1.min.js'></script>
+		<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+		<script src="leaflet.hotline.min.js"></script>
 		<script src="booklet.js"></script>
 
 		<link rel="stylesheet" href="style.css">
@@ -22,7 +24,7 @@
 			<section id="welcome_container">
 				<div id="welcome">
 					<h1>Wazzu Racing Datalog Viewer</h1>
-					<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+					<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita k gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
 					<br>
 					<input type="file" accept=".bin,.dat,.txt" id="fileupload">
 				</div>
@@ -36,123 +38,33 @@
 					</div>
 				</header>
 				<main class="grid-stack">
-					<div id="map"></div>
+					<div id="map">
+						<label>hotline:<select id="hotline" onchange="updatemap()"><option value=''>(nothing)</option><option value='write_millis'>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm'>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed' selected>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label>
+						<div id="map_el"></div>
+					</div>
 					<div id="table"></div>
 					<div id="plot_c">
-						<label>PLOT:  field 1:<select id="field1" onchange="plot()">
-<option value=''>(nothing)</option>
-<option value='write_millis'>write_millis</option>
-<option value='ecu_millis'>ecu_millis</option>
-<option value='gps_millis'>gps_millis</option>
-<option value='imu_millis'>imu_millis</option>
-<option value='accel_millis'>accel_millis</option>
-<option value='analogx1_millis'>analogx1_millis</option>
-<option value='analogx2_millis'>analogx2_millis</option>
-<option value='analogx3_millis'>analogx3_millis</option>
-<option selected value='rpm'>rpm</option>
-<option value='time'>time</option>
-<option value='syncloss_count'>syncloss_count</option>
-<option value='syncloss_code'>syncloss_code</option>
-<option value='lat'>lat</option>
-<option value='lon'>lon</option>
-<option value='elev'>elev</option>
-<option value='unixtime'>unixtime</option>
-<option value='ground_speed'>ground_speed</option>
-<option value='afr'>afr</option>
-<option value='fuelload'>fuelload</option>
-<option value='spark_advance'>spark_advance</option>
-<option value='baro'>baro</option>
-<option value='map'>map</option>
-<option value='mat'>mat</option>
-<option value='clnt_temp'>clnt_temp</option>
-<option value='tps'>tps</option>
-<option value='batt'>batt</option>
-<option value='oil_press'>oil_press</option>
-<option value='ltcl_timing'>ltcl_timing</option>
-<option value='ve1'>ve1</option>
-<option value='ve2'>ve2</option>
-<option value='egt'>egt</option>
-<option value='maf'>maf</option>
-<option value='in_temp'>in_temp</option>
-<option value='ax'>ax</option>
-<option value='ay'>ay</option>
-<option value='az'>az</option>
-<option value='imu_x'>imu_x</option>
-<option value='imu_y'>imu_y</option>
-<option value='imu_z'>imu_z</option>
-<option value='susp_pot_1'>susp_pot_1</option>
-<option value='susp_pot_2'>susp_pot_2</option>
-<option value='susp_pot_3'>susp_pot_3</option>
-<option value='susp_pot_4'>susp_pot_4</option>
-<option value='rad_in'>rad_in</option>
-<option value='rad_out'>rad_out</option>
-<option value='amb_air_temp'>amb_air_temp</option>
-<option value='brake1'>brake1</option>
-<option value='brake2'>brake2</option>
-				</select></label>
-			<label>field 2:<select id="field2" onchange="plot()">
-<option value=''>(nothing)</option>
-<option value='write_millis'>write_millis</option>
-<option value='ecu_millis'>ecu_millis</option>
-<option value='gps_millis'>gps_millis</option>
-<option value='imu_millis'>imu_millis</option>
-<option value='accel_millis'>accel_millis</option>
-<option value='analogx1_millis'>analogx1_millis</option>
-<option value='analogx2_millis'>analogx2_millis</option>
-<option value='analogx3_millis'>analogx3_millis</option>
-<option value='rpm'>rpm</option>
-<option value='time'>time</option>
-<option value='syncloss_count'>syncloss_count</option>
-<option value='syncloss_code'>syncloss_code</option>
-<option value='lat'>lat</option>
-<option value='lon'>lon</option>
-<option value='elev'>elev</option>
-<option value='unixtime'>unixtime</option>
-<option value='ground_speed'>ground_speed</option>
-<option value='afr'>afr</option>
-<option value='fuelload'>fuelload</option>
-<option value='spark_advance'>spark_advance</option>
-<option value='baro'>baro</option>
-<option value='map'>map</option>
-<option value='mat'>mat</option>
-<option value='clnt_temp'>clnt_temp</option>
-<option value='tps'>tps</option>
-<option value='batt'>batt</option>
-<option value='oil_press'>oil_press</option>
-<option value='ltcl_timing'>ltcl_timing</option>
-<option value='ve1'>ve1</option>
-<option value='ve2'>ve2</option>
-<option value='egt'>egt</option>
-<option value='maf'>maf</option>
-<option value='in_temp'>in_temp</option>
-<option value='ax'>ax</option>
-<option value='ay'>ay</option>
-<option value='az'>az</option>
-<option value='imu_x'>imu_x</option>
-<option value='imu_y'>imu_y</option>
-<option value='imu_z'>imu_z</option>
-<option value='susp_pot_1'>susp_pot_1</option>
-<option value='susp_pot_2'>susp_pot_2</option>
-<option value='susp_pot_3'>susp_pot_3</option>
-<option value='susp_pot_4'>susp_pot_4</option>
-<option value='rad_in'>rad_in</option>
-<option value='rad_out'>rad_out</option>
-<option value='amb_air_temp'>amb_air_temp</option>
-<option value='brake1'>brake1</option>
-<option value='brake2'>brake2</option>
-				</select></label>
+						<label>field 1:<select id="field1" onchange="plot()"><option value=''>(nothing)</option><option value='write_millis'>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm' selected>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed'>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label>
+						<label>field 2:<select id="field2" onchange="plot()"><option value=''>(nothing)</option><option value='write_millis'>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm'>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed'>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label>
+						<!-- <label>field 3:<select id="field3" onchange="plot()"><option value=''>(nothing)</option><option value='write_millis'>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm'>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed'>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label> -->
+						<!-- <label>field 4:<select id="field4" onchange="plot()"><option value=''>(nothing)</option><option value='write_millis'>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm'>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed'>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label> -->
 						<div id="plot"></div>
 					</div>
+					<div id="info"></div>
 				</main>
 				<footer>
 					<span>
-						<!-- <button onclick="control_back()">⏮</button> -->
-						<!-- <button onclick="control_pause()">⏸</button> -->
-						<!-- <button onclick="control_play()">⏵</button> -->
-						<!-- <button onclick="control_forward()">⏭</button> -->
+						<button onclick="changetime(-600000)">&lt;&lt;&lt;</button>
+						<button onclick="changetime(-60000)">&lt;&lt;</button>
+						<button onclick="changetime(-1000)">&lt;</button>
+						<span id="curtime"></span>
+						<button onclick="changetime(1000)">&gt;</button>
+						<button onclick="changetime(60000)">&gt;&gt;</button>
+						<button onclick="changetime(600000)">&gt;&gt;&gt;</button>
 					</span>
 					<span>
 						<!-- <progress></progress> -->
+					  <input id="prog" type="range" min="0" max="10000" step="0.0001" value="0">
 					</span>
 				</footer>
 			</section>

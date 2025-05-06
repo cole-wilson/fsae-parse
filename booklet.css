@@ -5,8 +5,8 @@
 	left: 0;
 	overflow-y: auto;
 	overflow-x: hidden;
-	min-width: 300px;
-	min-height: 200px;
+	min-width: 100px;
+	min-height: 100px;
 	background: white;
 	width: 100px;
 	height: 100px;

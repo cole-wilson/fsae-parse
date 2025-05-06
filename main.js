@@ -14,6 +14,8 @@ var table = new Tabulator("#table", {
 	paginationSize:6,
     paginationSizeSelector:[3, 6, 8, 10],
 	renderHorizontal:"virtual",
+	selectableRows:1,
+	index: "write_millis",
     columns:[
 		{title: "write_millis", field: "write_millis", sorter: "number", minWidth: 120},
 		{title: "ecu_millis", field: "ecu_millis", sorter: "number", minWidth: 120},
@@ -66,7 +68,30 @@ var table = new Tabulator("#table", {
     ],
 });
 
-map = L.map('map').setView([34, -110], 3);
+function updateInfo() {
+	let times = get_series("unixtime", TIME_BOUNDS[0], TIME_BOUNDS[1]);
+	let tmin = times[0].toLocaleTimeString();
+	let tmax = times[times.length-1].toLocaleTimeString();
+
+	var seconds = (TIME_BOUNDS[1]-TIME_BOUNDS[0])/1000;
+	seconds = Math.round(seconds*1000)/1000;
+
+	var dist = turf.length(turf.lineString(get_points(null, TIME_BOUNDS[0], TIME_BOUNDS[1])), { units: "miles" });
+	var units = "miles";
+	if (dist < 1) {
+		units = "feet";
+		dist = turf.length(turf.lineString(get_points(null, TIME_BOUNDS[0], TIME_BOUNDS[1])), { units: "feet" });
+	}
+
+
+	document.getElementById("info").innerHTML = `
+	<b>${tmin} &rarr; ${tmax}</b><br>
+	<b>Time:</b> ${seconds} s<br>
+	<b>Distance Traveled: </b> ${dist} ${units}<br>
+	`
+}
+
+map = L.map('map_el').setView([34, -110], 3);
 	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 25,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -76,6 +101,7 @@ map = L.map('map').setView([34, -110], 3);
 new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
 new BookletWindow("#plot_c", {title:"Main Plot", x:300, y:150, w:800, h:500, closable:false})
 new BookletWindow("#table", {title:"Data Table", x:700, y:30, w:600, h:200, closable:false})
+new BookletWindow("#info", {title:"Details", x:900, y:500, w:250, h:100, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
 function toData(buffer, n_ints, n_floats) {
@@ -101,19 +127,19 @@ function toData(buffer, n_ints, n_floats) {
 	return data;
 }
 function toCSV(buffer, n_ints, n_floats) {
-	let data = toData(buffer, n_ints, n_floats);
-	// make actual CSV
-	var csv = "";
-	for (var row_i=0;row_i<data.length;row_i++) {
-		for (var i=0;i<(n_ints+n_floats);i++) {
-			csv += data[row_i][i];
-			if (i < (n_ints+n_floats - 1)) {
-				csv += ",";
-			}
-		}
-		csv += "\n";
-	}
-	return csv;
+	// let data = toData(buffer, n_ints, n_floats);
+	// // make actual CSV
+	// var csv = "";
+	// for (var row_i=0;row_i<data.length;row_i++) {
+	// 	for (var i=0;i<(n_ints+n_floats);i++) {
+	// 		csv += data[row_i][i];
+	// 		if (i < (n_ints+n_floats - 1)) {
+	// 			csv += ",";
+	// 		}
+	// 	}
+	// 	csv += "\n";
+	// }
+	// return csv;
 
 }
 
@@ -175,10 +201,25 @@ function toObjects(rawdata) {
 	return out;
 }
 
-
+var MAP_POINTER;
+var TIMER_ID = 0;
+var CURRENT_TIME = 4000;
+var MAP_HOTLINE;
+var TIME_BOUNDS = [0, Number.POSITIVE_INFINITY];
+let hotline_opts = {
+			min: 0,
+			max: 50,
+			palette: {
+				0.0: '#008800',
+				0.5: '#ffff00',
+				1.0: '#ff0000'
+			},
+			weight: 5,
+			outlineColor: '#000000',
+			outlineWidth: 1
+		};
 // TO GET THE DATA FROM UPLOAD #################################################################
 // https://stackoverflow.com/questions/32556664/getting-byte-array-through-input-type-file
-var markers = [];
 document.querySelector('#fileupload').onchange = go;
 function go() {
 	var reader = new FileReader();
@@ -195,12 +236,20 @@ function go() {
 		window.objects = objects;
 
 
-		for (var i=0;i<objects.length;i+=10) {
-			let t = objects[i];
-			var layer = L.circleMarker([t.lat, t.lon], {color: "red",radius: 3,opacity: 0,fillOpacity: 1,weight: 0}).addTo(map);
-			layer.bindPopup(t)
-			markers.push(layer);
-		}
+		// let geojson = JSON.stringify([{"type":"LineString","coordinates":points}]);
+		// var geojson = [{"type": "LineString","coordinates": points}];
+		// console.log(geojson)
+		// MAP_JSON = L.geoJSON(geojson)
+		// MAP_JSON.addTo(map);
+
+
+		MAP_POINTER = L.marker([get_series("lat")[1], get_series("lon")[1]]);
+		MAP_POINTER.addTo(map);
+		updatemap()
+
+		var bounds = MAP_HOTLINE.getBounds();
+		map.fitBounds(bounds);
+
 
 		// let csv = "file too large for csv for now...";
 		// console.log(data);
@@ -216,15 +265,32 @@ function go() {
 		// document.getElementById("table").innerHTML = html;
 		// let table = new
 		table.setData(objects);
+
 		plot();
-		setTimeout(() => {
-		map.setView([objects[20].lat,objects[20].lon], 17)
-		}, 1000)
+		setTimeout(plot, 500)
+		// setTimeout(() => {
+		// map.setView([objects[20].lat,objects[20].lon], 17)
+		// }, 1000)
 		let f = document.getElementById("fileupload").files[0].name;
 		document.getElementById("welcome_container").remove()
 		let d = get_series("unixtime").filter(i=>i>100)[0].toLocaleDateString();
 		document.getElementById("logtitle").innerText = `${d} (${f})`;
 		document.title = `${d} (${f}) - Wazzu Racing Datalog Viewer`
+		let wm = get_series("write_millis")
+		TIME_BOUNDS = [0, wm[wm.length-1]]
+
+		function customFilter(data, filterParams){
+			return data.write_millis > TIME_BOUNDS[0] && data.write_millis < TIME_BOUNDS[1]; //must return a boolean, true if it passes the filter.
+		}
+
+		table.setFilter(customFilter, {});
+		table.on("rowClick", function(e, row){
+			CURRENT_TIME = row.getData().write_millis;
+			updateall()
+		});
+		updateInfo()
+
+
 		// let out = document.getElementById("output");
 		// out.innerHTML = csv;
 		// out.style.height = (out.scrollHeight) + 20 + "px";
@@ -242,6 +308,9 @@ function go() {
 function plot() {
 	let field1 = document.getElementById("field1").value;
 	let field2 = document.getElementById("field2").value;
+	// let field3 = document.getElementById("field3").value;
+	// let field4 = document.getElementById("field4").value;
+
 	a = Plotly.newPlot('plot', [
 			{
 				x: get_series("write_millis"),
@@ -258,34 +327,132 @@ function plot() {
 				yaxis: 'y2',
 				name: field2
 			},
+			// {
+			// 	x: [CURRENT_TIME, CURRENT_TIME],
+			// 	y: [0, cursor_top],
+			// 	mode: 'lines',
+			// 	type: 'scatter',
+			// 	// yaxis: 'y3',
+			// 	// name: field2
+			// },
+			// {
+				// x: get_series("write_millis"),
+				// y: get_series(field4),
+				// mode: 'lines',
+				// type: 'scatter',
+				// yaxis: 'y4',
+				// name: field2
+			// },
 	], {
-	yaxis: {
-    title: {
-      text: field1
-    }
-  },
-  yaxis2: {
-    title: {
-      text: field2
-    },
-    overlaying: 'y',
-    side: 'right'
-  },
+	yaxis: {title: {text: field1}},
+  yaxis2: {title: {text: field2},overlaying: 'y',side: 'right'},
 		autosize:true,
 		margin: {
 			l:40,r:10,t:10,b:20
 		}
 	}, {responsive:true});
-	document.getElementById("plot").on('plotly_relayout', function(d){
-    console.log('done plotting', d);
+	document.getElementById("plot").on('plotly_relayout', updateall);
+	document.getElementById("plot").on('plotly_afterplot', updateall);
+	document.getElementById("plot").on('plotly_click', function(data){
+    var x = CURRENT_TIME;
+    for(var i=0; i < data.points.length; i++){
+        x = data.points[i].x;
+    }
+	CURRENT_TIME = x
+		updateall()
+
 });
 
 }
+function updateall(fromprog = false) {
+		let min = document.getElementById("plot").layout.xaxis.range[0];
+		let max = document.getElementById("plot").layout.xaxis.range[1];
+		if (min && max) {
+			TIME_BOUNDS = [min, max];
+			if (CURRENT_TIME < TIME_BOUNDS[0]) CURRENT_TIME = TIME_BOUNDS[0]
+			updatemap();
+			table.refreshFilter();
+			table.selectRow(CURRENT_TIME)
+			table.scrollToRow(CURRENT_TIME)
+			updateInfo()
+		}
+		if (!fromprog) {
+			let prog = 10000 * ((CURRENT_TIME - TIME_BOUNDS[0]) / (TIME_BOUNDS[1] - TIME_BOUNDS[0]))
+			document.getElementById("prog").value = prog
+			// console.log(prog)
+		}
+	document.getElementById("curtime").innerText = Math.round(CURRENT_TIME/10)/100
+}
+document.getElementById("prog").onchange = () => {
+	let p = document.getElementById("prog").value / 10000;
+	let c = (p * (TIME_BOUNDS[1] - TIME_BOUNDS[0])) + TIME_BOUNDS[0]
+	CURRENT_TIME = cclosest(c)
+		updateall(false)
+}
+function cclosest(c) {
+	return get_series("write_millis").reduce(function(prev, curr) {
+	  return (Math.abs(curr - c) < Math.abs(prev - c) ? curr : prev);
+	});
 
-function get_series(series) {
+}
+function changetime(a) {
+	// alert()
+	CURRENT_TIME = cclosest(CURRENT_TIME + a);
+	updateall()
+}
+function updatemap() {
+	if (MAP_HOTLINE) MAP_HOTLINE.remove();
+	let hl = document.getElementById("hotline").value;
+	let points = get_points(hl, TIME_BOUNDS[0], TIME_BOUNDS[1]);
+	let val = points.map(i=>i[2]).filter(i=>!Number.isNaN(i))
+	console.log(val)
+	let minmax = arrayMinMax(val)
+	hotline_opts.min = minmax[0]
+	hotline_opts.max = minmax[1]
+	console.log(hotline_opts)
+	MAP_HOTLINE = L.hotline(points, hotline_opts);
+	MAP_HOTLINE.addTo(map)
+	let current = get_points("write_millis", CURRENT_TIME-1, CURRENT_TIME+1)[0]
+	if (current) MAP_POINTER.setLatLng([current[0], current[1]])
+}
+function get_series(series, wm_min=null, wm_max=null) {
+	if (wm_max && wm_min) {
+		let filtered = objects.filter(i=>(i.write_millis<wm_max && i.write_millis>wm_min));
+		// console.log(filtered)
+		return filtered.map(i=>i[series])
+	}
 	return objects.map(i=>i[series])
 }
+function zip(arr1, arr2) {
+    return arr1.map((element, index) => [element, arr2[index]]);
+}
 
+function get_points(z_axis, w_min, w_max) {
+	var points = [];
+	for (var i=0;i<objects.length;i+=1) {
+		let t = objects[i];
+		if (t.lat != 0 && t.lon != 0) {
+			if (w_max) {
+				if (t.write_millis < w_max && t.write_millis > w_min) {
+					if (z_axis) points.push([t.lat, t.lon, t[z_axis]])
+					else points.push([t.lat, t.lon])
+				}
+			} else {
+				if (z_axis) points.push([t.lat, t.lon, t[z_axis]])
+				else points.push([t.lat, t.lon])
+			}
+		}
+		// layer.bindPopup(t)
+		// markers.push(layer);
+	}
+	return points;
+}
+//https://stackoverflow.com/questions/42623071/maximum-call-stack-size-exceeded-with-math-min-and-math-max#52613386
+const arrayMinMax = (arr) =>
+  arr.reduce(([min, max], val) => [Math.min(min, val), Math.max(max, val)], [
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+  ]);
 // TO DOWNLOAD THE CSV FILE ====================================================================
 // https://stackoverflow.com/questions/13405129/create-and-save-a-file-with-javascript
 function download(text, name, type) {
