@@ -194,8 +194,8 @@ function toObjects(rawdata) {
 		o.rad_in = (((row[43]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
 		o.rad_out = (((row[44]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
 		o.amb_air_temp = row[45];
-		o.brake1 = row[46] / 5024;
-		o.brake2 = row[47] / 5024;
+		o.brake1 = 5000*(((row[46]/5024.0)-0.1)/0.8);
+		o.brake2 = 5000*(((row[47]/5024.0)-0.1)/0.8);
 		out.push(o);
 	})
 	return out;
