@@ -383,7 +383,7 @@ function updateall(fromprog = false) {
 		}
 	document.getElementById("curtime").innerText = Math.round(CURRENT_TIME/10)/100
 }
-document.getElementById("prog").onchange = () => {
+document.getElementById("prog").oninput = () => {
 	let p = document.getElementById("prog").value / 10000;
 	let c = (p * (TIME_BOUNDS[1] - TIME_BOUNDS[0])) + TIME_BOUNDS[0]
 	CURRENT_TIME = cclosest(c)
