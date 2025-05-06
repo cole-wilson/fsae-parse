@@ -47,7 +47,7 @@ header span {
 	line-height: 50px;
 }
 
-footer span {line-height: 10px;}
+footer span {line-height: 50px;}
 main {
 	background: #4D4D4D;
 	position: fixed;
@@ -59,6 +59,7 @@ main {
 }
 
 footer {
+	text-align: center;
 	position: fixed;
 	bottom: 0;
 	background: #A60F2D;
@@ -101,4 +102,5 @@ footer {
 
 input[type="range"] {
 	width: 500px;
+	vertical-align: middle;
 }
