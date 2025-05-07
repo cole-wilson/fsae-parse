@@ -102,6 +102,7 @@ new BookletWindow("#plot_c", {title:"Main Plot", x:300, y:150, w:800, h:500, clo
 new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
 new BookletWindow("#table", {title:"Data Table", x:700, y:30, w:600, h:200, closable:false})
 new BookletWindow("#info", {title:"Details", x:900, y:500, w:250, h:100, closable:false})
+new BookletWindow("#oneval", {title:"Watch Value", x:900, y:50, w:250, h:100, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
 function toData(buffer, n_ints, n_floats) {
@@ -248,7 +249,11 @@ function go() {
 		updatemap()
 
 		var bounds = MAP_HOTLINE.getBounds();
-		map.fitBounds(bounds);
+		try {
+			map.fitBounds(bounds);
+		} catch {
+			console.error(bounds)
+		}
 
 
 		// let csv = "file too large for csv for now...";
@@ -373,7 +378,17 @@ function updateall(fromprog = false) {
 			updatemap();
 			table.refreshFilter();
 			table.selectRow(CURRENT_TIME)
-			table.scrollToRow(CURRENT_TIME)
+
+			let watchval = document.getElementById("watch").value;
+			console.log(watchval);
+			document.getElementById("watchval").innerHTML = get_series(watchval, CURRENT_TIME-1, CURRENT_TIME+1)[0];
+
+
+			// from chatgpt:
+			let horizontal = table.scrollLeft;
+			table.scrollToRow(CURRENT_TIME).then(()=>{table.scrollLeft = horizontal;})
+			// end
+
 			updateInfo()
 		}
 		if (!fromprog) {
@@ -417,7 +432,7 @@ function updatemap() {
 }
 function get_series(series, wm_min=null, wm_max=null) {
 	if (wm_max && wm_min) {
-		let filtered = objects.filter(i=>(i.write_millis<wm_max && i.write_millis>wm_min));
+		let filtered = objects.filter(i=>(i.write_millis<wm_max && i.write_millis>=wm_min));
 		// console.log(filtered)
 		return filtered.map(i=>i[series])
 	}

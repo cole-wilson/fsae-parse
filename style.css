@@ -57,6 +57,9 @@ main {
 	height: calc(100vh - 50px - 50px);
 	min-height: calc(100vh - 50px - 50px);
 }
+#watchval {
+	font-size: 2em;
+}
 
 footer {
 	text-align: center;

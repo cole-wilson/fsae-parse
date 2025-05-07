@@ -53,6 +53,12 @@
 						<div id="plot"></div>
 					</div>
 					<div id="info"></div>
+					<div id="oneval">
+						<label>watch:<select id="watch" onchange="updateall()"><option value=''>(nothing)</option><option value='write_millis' selected>write_millis</option><option value='ecu_millis'>ecu_millis</option><option value='gps_millis'>gps_millis</option><option value='imu_millis'>imu_millis</option><option value='accel_millis'>accel_millis</option><option value='analogx1_millis'>analogx1_millis</option><option value='analogx2_millis'>analogx2_millis</option><option value='analogx3_millis'>analogx3_millis</option><option value='rpm'>rpm</option><option value='time'>time</option><option value='syncloss_count'>syncloss_count</option><option value='syncloss_code'>syncloss_code</option><option value='lat'>lat</option><option value='lon'>lon</option><option value='elev'>elev</option><option value='unixtime'>unixtime</option><option value='ground_speed'>ground_speed</option><option value='afr'>afr</option><option value='fuelload'>fuelload</option><option value='spark_advance'>spark_advance</option><option value='baro'>baro</option><option value='map'>map</option><option value='mat'>mat</option><option value='clnt_temp'>clnt_temp</option><option value='tps'>tps</option><option value='batt'>batt</option><option value='oil_press'>oil_press</option><option value='ltcl_timing'>ltcl_timing</option><option value='ve1'>ve1</option><option value='ve2'>ve2</option><option value='egt'>egt</option><option value='maf'>maf</option><option value='in_temp'>in_temp</option><option value='ax'>ax</option><option value='ay'>ay</option><option value='az'>az</option><option value='imu_x'>imu_x</option><option value='imu_y'>imu_y</option><option value='imu_z'>imu_z</option><option value='susp_pot_1'>susp_pot_1</option><option value='susp_pot_2'>susp_pot_2</option><option value='susp_pot_3'>susp_pot_3</option><option value='susp_pot_4'>susp_pot_4</option><option value='rad_in'>rad_in</option><option value='rad_out'>rad_out</option><option value='amb_air_temp'>amb_air_temp</option><option value='brake1'>brake1</option><option value='brake2'>brake2</option></select></label>
+						<br>
+						<span id="watchval">--</span>
+
+					</div>
 				</main>
 				<footer>
 					<span>
