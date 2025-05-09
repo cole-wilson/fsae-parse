@@ -33,7 +33,7 @@
 			</section>
 			<section>
 				<header>
-					<span>Wazzu Racing Datalog Viewer</span>
+					<span><b>Wazzu Racing Datalog Viewer</b></span>
 					<div style="display:inline-block;float:right;text-align:right;margin-right:50px">
 						<span id="logtitle">filename...</span>
 						<a href="#" id="download" style="color: white">[csv]</a>
@@ -62,6 +62,10 @@
 					</div>
 				</main>
 				<footer>
+					<span>
+						<button onclick="alert(booklet_save())">save layout</button>
+						<button onclick="booklet_load(prompt('paste layout:'))">load layout</button>
+					</span>
 					<span>
 						<button onclick="changetime(-600000)">&lt;&lt;&lt;</button>
 						<button onclick="changetime(-60000)">&lt;&lt;</button>

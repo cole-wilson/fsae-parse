@@ -308,10 +308,17 @@ function go() {
 
 		CURRENT_TIME = cclosest(0)
 
+		booklet_load(localStorage.getItem("booklet-save") || []);
+
 		setTimeout(updateall, 300);
+		setInterval(updatesave, 1000);
 
 	}
 	reader.readAsArrayBuffer(document.getElementById("fileupload").files[0]);
+}
+
+function updatesave() {
+	localStorage.setItem("booklet-save", booklet_save())
 }
 
 function plot() {
@@ -409,6 +416,7 @@ function updateall(fromprog = false) {
 			// console.log(prog)
 		}
 	document.getElementById("curtime").innerText = Math.round(CURRENT_TIME/10)/100
+	updatesave()
 }
 document.getElementById("prog").oninput = () => {
 	let p = document.getElementById("prog").value / 10000;

@@ -7,7 +7,9 @@ class BookletWindow {
 	activetab;
 
 	constructor(oid, opts) {
-		this.id = 'booklet-' + btoa((new Date()).getTime() + Math.random());
+		let oel = document.querySelector(oid);
+		// this.id = 'booklet-' + btoa((new Date()).getTime() + Math.random());
+		this.id = 'booklet-' + oel.id;
 
 		this.el = document.createElement("div");
 			this.el.classList.add("booklet-window");
@@ -79,7 +81,7 @@ class BookletWindow {
 		this.content.classList.add("booklet-content");
 		this.el.appendChild(this.content);
 
-		this.content.appendChild(document.querySelector(oid))
+		this.content.appendChild(oel)
 
 		this.el.onkeydown = this.maximize
 
@@ -118,4 +120,34 @@ class BookletWindow {
 
 	set name(n) {this.nameEl.innerText = n;}
 
+}
+
+function booklet_save() {
+	let elements = document.getElementsByClassName("booklet-window");
+	var data = [];
+	for (var i=0; i<elements.length; i++) {
+		let element = elements[i];
+		data.push({
+			id: element.id,
+			x: element.style.left,
+			y: element.style.top,
+			w: element.style.width,
+			h: element.style.height,
+			minimized: element.classList.contains("minimized")
+		});
+	}
+	return JSON.stringify(data);
+}
+
+function booklet_load(json) {
+	let data = JSON.parse(json);
+	data.forEach(i=>{
+		let e = document.getElementById(i.id);
+		console.log(e)
+		e.style.top = i.y;
+		e.style.left = i.x;
+		e.style.height = i.h;
+		e.style.width = i.w;
+		if (i.minimized) e.classList.add("minimized");
+	});
 }
