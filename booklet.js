@@ -57,14 +57,14 @@ class BookletWindow {
 		topbarEl.ondblclick = function() {this.minimize()}
 
 		let maximizebutton = document.createElement("button");
-			maximizebutton.innerHTML = "+";
+			maximizebutton.innerHTML = "f";
 			maximizebutton.onclick = () => {this.maximize()};
 			// this.el.ondblclick = () => {this.maximize()};
 			topbarEl.appendChild(maximizebutton)
 
 
 		let minimizebutton = document.createElement("button");
-			minimizebutton.innerHTML = "-";
+			minimizebutton.innerHTML = "^";
 			minimizebutton.onclick = () => {this.minimize()};
 			topbarEl.appendChild(minimizebutton)
 		if (opts.minimized) this.minimize();
