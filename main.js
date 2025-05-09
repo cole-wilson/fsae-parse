@@ -102,7 +102,7 @@ new BookletWindow("#plot_c", {title:"Main Plot", x:300, y:150, w:800, h:500, clo
 new BookletWindow("#map", {title:"GPS Data Map", x:0, y:0, w:600, h:600, closable:false})
 new BookletWindow("#table", {title:"Data Table", x:700, y:30, w:600, h:200, closable:false})
 new BookletWindow("#info", {title:"Details", x:900, y:500, w:250, h:100, closable:false})
-new BookletWindow("#oneval", {title:"Watch Value", x:900, y:50, w:250, h:100, closable:false})
+new BookletWindow("#oneval", {title:"Watch Value", x:900, y:50, w:250, h:120, closable:false})
 
 // actually do ArrayBuffer --> CSV conversion
 function toData(buffer, n_ints, n_floats) {
@@ -306,6 +306,10 @@ function go() {
 		a.style.display = "inline";
 		a.onclick = (_) => {table.download("csv", f.replace(".bin", ".csv"))};
 
+		CURRENT_TIME = cclosest(0)
+
+		setTimeout(updateall, 300);
+
 	}
 	reader.readAsArrayBuffer(document.getElementById("fileupload").files[0]);
 }
@@ -374,7 +378,7 @@ function updateall(fromprog = false) {
 		let max = document.getElementById("plot").layout.xaxis.range[1];
 		if (min && max) {
 			TIME_BOUNDS = [min, max];
-			if (CURRENT_TIME < TIME_BOUNDS[0]) CURRENT_TIME = TIME_BOUNDS[0]
+			if (CURRENT_TIME < TIME_BOUNDS[0]) CURRENT_TIME = cclosest(TIME_BOUNDS[0])
 			updatemap();
 			table.refreshFilter();
 			table.selectRow(CURRENT_TIME)
@@ -382,6 +386,14 @@ function updateall(fromprog = false) {
 			let watchval = document.getElementById("watch").value;
 			console.log(watchval);
 			document.getElementById("watchval").innerHTML = get_series(watchval, CURRENT_TIME-1, CURRENT_TIME+1)[0];
+			let arr = get_series(watchval, TIME_BOUNDS[0], TIME_BOUNDS[1]);
+			const average = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+			const minmax = arrayMinMax(arr);
+			document.getElementById("watchmore").innerHTML = `<br>
+			<b>Min:</b> ${minmax[0]}<br>
+			<b>Max:</b> ${minmax[1]}<br>
+			<b>Mean:</b> ${average(arr)}<br>
+			`
 
 
 			// from chatgpt:
