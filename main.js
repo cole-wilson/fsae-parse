@@ -318,6 +318,7 @@ function go() {
 }
 
 function updatesave() {
+	console.log('saved...')
 	localStorage.setItem("booklet-save", booklet_save())
 }
 
