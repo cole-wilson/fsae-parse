@@ -1,0 +1,13 @@
+{
+  "background_color": "#4d4d4d",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "FSAE Parse",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "fsae-parse",
+  "start_url": "/",
+  "theme_color": "#a60f2d",
+  "id": "fsae-parse-wazzu-racing",
+  "description": "Parse Wazzu Racing Datalogger files and connect to the car live."
+}

@@ -40,12 +40,12 @@ var table = new Tabulator("#table", {
     columns:[
 		{title: "write_millis", field: "write_millis", sorter: "number", minWidth: 120},
 		{title: "ecu_millis", field: "ecu_millis", sorter: "number", minWidth: 120},
+		{title: "breakout_millis", field: "breakout_millis", sorter: "number", minWidth: 120},
 		{title: "gps_millis", field: "gps_millis", sorter: "number", minWidth: 120},
 		{title: "imu_millis", field: "imu_millis", sorter: "number", minWidth: 120},
 		{title: "accel_millis", field: "accel_millis", sorter: "number", minWidth: 120},
-		{title: "analogx1_millis", field: "analogx1_millis", sorter: "number", minWidth: 120},
-		{title: "analogx2_millis", field: "analogx2_millis", sorter: "number", minWidth: 120},
-		{title: "analogx3_millis", field: "analogx3_millis", sorter: "number", minWidth: 120},
+		{title: "analog_millis", field: "analog_millis", sorter: "number", minWidth: 120},
+		{title: "thermo_millis", field: "thermo_millis", sorter: "number", minWidth: 120},
 		{title: "rpm", field: "rpm", sorter: "number", minWidth: 120},
 		{title: "time", field: "time", sorter: "number", minWidth: 120},
 		{title: "syncloss_count", field: "syncloss_count", sorter: "number", minWidth: 120},
@@ -68,7 +68,6 @@ var table = new Tabulator("#table", {
 		{title: "ltcl_timing", field: "ltcl_timing", sorter: "number", minWidth: 120},
 		{title: "ve1", field: "ve1", sorter: "number", minWidth: 120},
 		{title: "ve2", field: "ve2", sorter: "number", minWidth: 120},
-		{title: "egt", field: "egt", sorter: "number", minWidth: 120},
 		{title: "maf", field: "maf", sorter: "number", minWidth: 120},
 		{title: "in_temp", field: "in_temp", sorter: "number", minWidth: 120},
 		{title: "ax", field: "ax", sorter: "number", minWidth: 120},
@@ -79,13 +78,19 @@ var table = new Tabulator("#table", {
 		{title: "imu_z", field: "imu_z", sorter: "number", minWidth: 120},
 		{title: "susp_pot_1 (FL)", field: "susp_pot_1", sorter: "number", minWidth: 120},
 		{title: "susp_pot_2 (FR)", field: "susp_pot_2", sorter: "number", minWidth: 120},
-		{title: "susp_pot_3 (RR)", field: "susp_pot_3", sorter: "number", minWidth: 120},
-		{title: "susp_pot_4 (RL)", field: "susp_pot_4", sorter: "number", minWidth: 120},
-		{title: "rad_in", field: "rad_in", sorter: "number", minWidth: 120},
-		{title: "rad_out", field: "rad_out", sorter: "number", minWidth: 120},
+		{title: "susp_pot_3 (RL)", field: "susp_pot_3", sorter: "number", minWidth: 120},
+		{title: "susp_pot_4 (RR)", field: "susp_pot_4", sorter: "number", minWidth: 120},
+		{title: "oil_temp", field: "oil_temp", sorter: "number", minWidth: 120},
 		{title: "amb_air_temp", field: "amb_air_temp", sorter: "number", minWidth: 120},
 		{title: "brake1", field: "brake1", sorter: "number", minWidth: 120},
-		{title: "brake2", field: "brake2", sorter: "number", minWidth: 120}
+		{title: "brake2", field: "brake2", sorter: "number", minWidth: 120},
+		{title: "rad_in", field: "rad_in", sorter: "number", minWidth: 120},
+		{title: "rad_out", field: "rad_out", sorter: "number", minWidth: 120},
+		{title: "steering", field: "steering", sorter: "number", minWidth: 120},
+		{title: "thermo_1", field: "thermo_1", sorter: "number", minWidth: 120},
+		{title: "thermo_2", field: "thermo_2", sorter: "number", minWidth: 120},
+		{title: "thermo_3", field: "thermo_3", sorter: "number", minWidth: 120},
+		{title: "thermo_4", field: "thermo_4", sorter: "number", minWidth: 120},
     ],
 });
 
@@ -172,10 +177,10 @@ async function read_data_from_serial(port) {
 
 				if (last_three[0] == 10 && last_three[1] == 10 && last_three[2] == 10) {
 					serial_buffer = serial_buffer.slice(0, -4);
-					let ab = new Uint8Array(serial_buffer.slice(-(48 * 4)));
+					let ab = new Uint8Array(serial_buffer.slice(-(52 * 4)));
 					serial_buffer = [];
 
-					let data = toData(ab.buffer, 48, 0);
+					let data = toData(ab.buffer, 52, 0);
 					let objects = toObjects(data);
 
 					// console.log(objects[0]).write_millis;
@@ -267,12 +272,12 @@ function toObjects(rawdata) {
 		var o = {};
 		o.write_millis = row[0];//Math.round((Number(new Date()) - 1764987313311)/1); //row[0];
 		o.ecu_millis = row[1];
-		o.gps_millis = row[2];
-		o.imu_millis = row[3];
-		o.accel_millis = row[4];
-		o.analogx1_millis = row[5];
-		o.analogx2_millis = row[6];
-		o.analogx3_millis = row[7];
+		o.breakout_millis = row[2]
+		o.gps_millis = row[3];
+		o.imu_millis = row[4];
+		o.accel_millis = row[5];
+		o.analog_millis = row[6];
+		o.thermo_millis = row[7];
 		o.rpm = row[8];
 		o.time = row[9];
 		o.syncloss_count = row[10];
@@ -295,24 +300,29 @@ function toObjects(rawdata) {
 		o.ltcl_timing = row[27]/ 1000;
 		o.ve1 = row[28]/ 1000;
 		o.ve2 = row[29]/ 1000;
-		o.egt = row[30]/ 1000;
-		o.maf = row[31]/ 1000;
-		o.in_temp = row[32]/ 1000;
-		o.ax = row[33]/ 1000;
-		o.ay = row[34]/ 1000;
-		o.az = row[35]/ 1000;
-		o.imu_x = row[36]/ 1000;
-		o.imu_y = row[37]/ 1000;
-		o.imu_z = row[38]/ 1000;
-		o.susp_pot_1 = ((((row[39]/5024))/(1))*(100))/25.4;
-		o.susp_pot_2 = ((((row[40]/5024))/(1))*(100))/25.4;
-		o.susp_pot_3 = ((((row[41]/5024))/(1))*(100))/25.4;
-		o.susp_pot_4 = ((((row[42]/5024))/(1))*(100))/25.4;
-		o.rad_in = (((row[43]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
-		o.rad_out = (((row[44]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
-		o.amb_air_temp = row[45];
-		o.brake1 = 5000*(((row[46]/5024.0)-0.1)/0.8);
-		o.brake2 = 5000*(((row[47]/5024.0)-0.1)/0.8);
+		o.maf = row[30]/ 1000;
+		o.in_temp = row[31]/ 1000;
+		o.ax = row[32]/ 1000;
+		o.ay = row[33]/ 1000;
+		o.az = row[34]/ 1000;
+		o.imu_x = row[35]/ 1000;
+		o.imu_y = row[36]/ 1000;
+		o.imu_z = row[37]/ 1000;
+		o.susp_pot_1 = ((((row[38]/5024))/(1))*(100))/25.4;
+		o.susp_pot_2 = ((((row[39]/5024))/(1))*(100))/25.4;
+		o.susp_pot_3 = ((((row[40]/5024))/(1))*(100))/25.4;
+		o.susp_pot_4 = ((((row[41]/5024))/(1))*(100))/25.4;
+		o.oil_temp = row[42]/ 1000;
+		o.amb_air_temp = row[43];
+		o.brake1 = 5000*(((row[44]/5024.0)-0.1)/0.8);
+		o.brake2 = 5000*(((row[45]/5024.0)-0.1)/0.8);
+		o.rad_in = (((row[46]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
+		o.rad_out = (((row[47]/5024)-0.5232)/(0.0084-0.5232))*(302+58)-58;
+		o.steering = row[48]/ 1000;
+		o.thermo_1 = row[49]/ 1000;
+		o.thermo_2 = row[50]/ 1000;
+		o.thermo_3 = row[51]/ 1000;
+		o.thermo_4 = row[52]/ 1000;
 		out.push(o);
 	})
 	return out;
@@ -336,7 +346,7 @@ let hotline_opts = {
 			outlineWidth: 1
 		};
 function fromfile(databytes) {
-	let data = toData(databytes, 48, 0);
+	let data = toData(databytes, 52, 0);
 	let objects = toObjects(data);
 	console.log(objects)
 
@@ -649,4 +659,17 @@ function download(text, name, type) {
 	var file = new Blob([text], {type: type});
 	a.href = URL.createObjectURL(file);
 	a.download = name;
+}
+
+
+// SW ============================================================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      let reg = await navigator.serviceWorker.register('/sw.js');
+      console.log('sw registration successful:', reg);
+    } catch (err) {
+      console.log('sw registration failed:', err);
+    }
+  });
 }
